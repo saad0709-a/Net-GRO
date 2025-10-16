@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LinkedIn Lite — Vanilla JS</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="nav">
+    <div class="nav__brand">Net<span>GRO</span></div>
+    <nav class="nav__links">
+      <a href="#home" data-route>Home</a>
+      <a href="#profile" data-route>Profile</a>
+      <a href="#create" data-route>Create Post</a>
+      <button id="logoutBtn" class="btn btn--ghost">Logout</button>
+    </nav>
+  </header>
+
+  <!-- Auth Gate (Login / Signup) -->
+  <main id="authGate" class="auth hidden">
+    <section class="card auth__panel">
+      <h2>Welcome back</h2>
+      <form id="loginForm" class="form">
+        <div class="form__group">
+          <label>Email</label>
+          <input type="email" id="loginEmail" required placeholder="you@example.com" />
+        </div>
+        <div class="form__group">
+          <label>Password</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" />
+        </div>
+        <button class="btn btn--primary" type="submit">Login</button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+
+      <h3>Create an account</h3>
+      <form id="signupForm" class="form">
+        <div class="form__grid">
+          <div class="form__group">
+            <label>Name</label>
+            <input type="text" id="signupName" required placeholder="Jane Doe" />
+          </div>
+          <div class="form__group">
+            <label>Email</label>
+            <input type="email" id="signupEmail" required placeholder="jane@example.com" />
+          </div>
+          <div class="form__group">
+            <label>Password</label>
+            <input type="password" id="signupPassword" required placeholder="••••••••" />
+          </div>
+          <div class="form__group">
+            <label>Headline</label>
+            <input type="text" id="signupHeadline" placeholder="Frontend Developer" />
+          </div>
+          <div class="form__group form__group--full">
+            <label>Bio</label>
+            <textarea id="signupBio" rows="3" placeholder="Short bio…"></textarea>
+          </div>
+        </div>
+        <button class="btn" type="submit">Sign Up</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- App Shell -->
+  <main id="app" class="container hidden">
+    <!-- Home Feed -->
+    <section id="home" class="route">
+      <div class="page__header">
+        <h2>Home</h2>
+        <p class="muted">See what people are posting.</p>
+      </div>
+
+      <!-- Search -->
+      <section class="card searchbar">
+        <input id="feedSearch" type="search" placeholder="Search posts or authors…" />
+        <button class="btn btn--small" id="clearSearch">Clear</button>
+      </section>
+
+      <!-- Quick composer -->
+      <section class="card composer">
+        <div class="composer__avatar">
+          <img id="composerAvatar" alt="Avatar" />
+        </div>
+        <form id="quickPostForm" class="composer__form">
+          <textarea id="quickPostContent" rows="2" placeholder="Share something…"></textarea>
+          <div class="file">
+            <input type="file" id="quickPostImage" accept="image/*" />
+            <label for="quickPostImage">Attach image</label>
+          </div>
+          <img id="quickPreview" class="preview hidden" alt="preview" />
+          <div class="composer__actions">
+            <button class="btn btn--primary" type="submit">Post</button>
+            <a href="#create" data-route class="btn btn--ghost">Open full editor</a>
+          </div>
+        </form>
+      </section>
+
+      <div id="feedList" class="stack"></div>
+    </section>
+
+    <!-- Profile -->
+    <section id="profile" class="route hidden">
+      <div class="page__header">
+        <h2>Profile</h2>
+      </div>
+
+      <section class="profile card">
+        <div class="profile__head">
+          <img id="profileAvatar" class="profile__avatar" alt="Avatar" />
+          <div>
+            <h3 id="profileName"></h3>
+            <p id="profileHeadline" class="muted"></p>
+            <p id="profileBio"></p>
+          </div>
+        </div>
+        <div class="profile__meta">
+          <div><strong>Posts</strong> <span id="profilePostCount">0</span></div>
+          <div><strong>Skills</strong> <span id="profileSkillCount">0</span></div>
+        </div>
+      </section>
+
+      <!-- Profile editor -->
+      <section class="card">
+        <h4>Edit Profile</h4>
+        <form id="profileForm" class="form">
+          <div class="form__grid">
+            <div class="form__group">
+              <label>Name</label>
+              <input type="text" id="editName" />
+            </div>
+            <div class="form__group">
+              <label>Headline</label>
+              <input type="text" id="editHeadline" />
+            </div>
+            <div class="form__group form__group--full">
+              <label>Bio</label>
+              <textarea id="editBio" rows="3"></textarea>
+            </div>
+            <div class="form__group form__group--full">
+              <label>Avatar</label>
+              <input type="file" id="editAvatar" accept="image/*" />
+              <img id="editAvatarPreview" class="preview hidden" alt="avatar preview" />
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn btn--primary" type="submit">Save</button>
+            <button class="btn btn--ghost" type="button" id="resetProfile">Reset changes</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="grid">
+        <section class="card">
+          <h4>Education</h4>
+          <ul id="eduList" class="list"></ul>
+          <form id="eduForm" class="form form--inline">
+            <input type="text" id="eduTitle" placeholder="Degree/Title" required />
+            <input type="text" id="eduCollege" placeholder="College" required />
+            <input type="text" id="eduYear" placeholder="Year" required />
+            <button class="btn btn--small" type="submit">Add</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h4>Experience</h4>
+          <ul id="expList" class="list"></ul>
+          <form id="expForm" class="form form--inline">
+            <input type="text" id="expRole" placeholder="Role" required />
+            <input type="text" id="expCompany" placeholder="Company" required />
+            <input type="text" id="expDuration" placeholder="Duration" required />
+            <button class="btn btn--small" type="submit">Add</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h4>Skills</h4>
+          <ul id="skillList" class="chiplist"></ul>
+          <form id="skillForm" class="form form--inline">
+            <input type="text" id="skillTitle" placeholder="Skill (e.g., JavaScript)" required />
+            <button class="btn btn--small" type="submit">Add</button>
+          </form>
+        </section>
+      </div>
+
+      <!-- Backup / Restore -->
+      <section class="card">
+        <h4>Backup & Restore</h4>
+        <div class="row">
+          <button class="btn" id="exportBtn">Export JSON</button>
+          <label class="file">
+            <input type="file" id="importFile" accept="application/json" />
+            <span>Import JSON</span>
+          </label>
+        </div>
+        <p class="muted" style="margin-top:.5rem">Export saves all users, posts, comments, likes, education, experience, and skills. Import will replace current data.</p>
+      </section>
+    </section>
+
+    <!-- Create Post -->
+    <section id="create" class="route hidden">
+      <div class="page__header">
+        <h2>Create Post</h2>
+        <p class="muted">Write a post to share with your network.</p>
+      </div>
+      <section class="card">
+        <form id="createPostForm" class="form">
+          <div class="form__group">
+            <label>Content</label>
+            <textarea id="createPostContent" rows="5" placeholder="What's on your mind?" required></textarea>
+          </div>
+          <div class="form__group">
+            <label>Attach image (optional)</label>
+            <input type="file" id="createPostImage" accept="image/*" />
+            <img id="createPreview" class="preview hidden" alt="preview" />
+          </div>
+          <button class="btn btn--primary" type="submit">Publish</button>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
