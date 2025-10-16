@@ -6,7 +6,8 @@
    - Feed search/filter
    - Image attachments for posts (base64)
    - Import/Export JSON backup/restore
-   ====================================================================== */
+  NOTE: AUTO_LOGIN is disabled by default so site opens to Login page.
+  ====================================================================== */
 
 const $ = (sel, parent = document) => parent.querySelector(sel);
 const $$ = (sel, parent = document) => Array.from(parent.querySelectorAll(sel));
@@ -22,6 +23,10 @@ const KEYS = {
   counters: 'll_counters',
   session: 'll_session'
 };
+
+// Toggle this to true only while testing/demoing so a seeded user is auto-logged-in.
+// Leave false for production so users land on the login/signup screen.
+const AUTO_LOGIN = false;
 
 const get = (key, fallback = []) => {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -117,7 +122,10 @@ function seedIfEmpty() {
   const l2 = { LikeID: nextId('Like'), UserID: user1.UserID, PostID: post2.PostID };
   set(KEYS.likes, [l1, l2]);
 
-  set(KEYS.session, { userId: user1.UserID });
+  // IMPORTANT: do not auto-create a session in production; only create it if AUTO_LOGIN is true.
+  if (AUTO_LOGIN) {
+    set(KEYS.session, { userId: user1.UserID });
+  }
 }
 
 /* ---------- Auth & session ---------- */
@@ -352,8 +360,17 @@ $('#signupForm')?.addEventListener('submit',e=>{
 /* ---------- Gate ---------- */
 function gate(){
   const u=currentUser();
-  if(u){$('#authGate').classList.add('hidden');$('#app').classList.remove('hidden');showRoute();}
-  else{$('#app').classList.add('hidden');$('#authGate').classList.remove('hidden');}
+  if(u){
+    $('#authGate').classList.add('hidden');
+    $('#app').classList.remove('hidden');
+    showRoute();
+  } else {
+    // ensure app UI is hidden and auth UI is shown
+    $('#app').classList.add('hidden');
+    $('#authGate').classList.remove('hidden');
+    // remove any sensitive hash route if present
+    if(location.hash && location.hash !== '') location.hash = '';
+  }
 }
 
 /* ---------- Toast ---------- */
